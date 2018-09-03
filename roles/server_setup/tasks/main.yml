@@ -1,0 +1,116 @@
+---
+- name: Install Common Packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - htop
+    - ccze
+    - git
+    - python3-pip
+  
+- name: Install Docker prerequisites
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+
+- name: Add the Docker APT Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - "{{ docker_apt_repository }}"
+    - "{{ ansible_apt_repository }}"
+
+- name: Install Docker on the Host
+  apt:
+    name: docker-ce
+    state: present
+    update_cache: yes
+
+- name: Install docker compose
+  shell: curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+- name: Change docker compose permission
+  shell: chmod +x /usr/local/bin/docker-compose
+
+
+- name: Install Ansible on the Host
+  apt:
+    name: ansible
+    state: present
+    update_cache: yes
+
+- name: Install ansible configuration file
+  copy:
+    src: ansible.cfg
+    dest: /etc/ansible/ansible.cfg
+    owner: root
+
+- name: Copy Jenkins Dockerfile
+  copy:
+    src: jenkins_dockerfile
+    dest: dockerfile
+    owner: root
+  register: fileout
+
+- name: Copy Jenkins Plugins File
+  copy:
+    src: plugins.txt 
+    dest: plugins.txt
+    owner: root
+  register: fileout
+
+- name: Install docker-py
+  easy_install:
+    name: docker_py
+    state: latest  
+
+- name: Checkout ckan repo
+  git:
+    repo: 'https://github.com/ckan/ckan.git'
+    dest: '$HOME/ckan'
+    force: yes
+
+- name: create env file
+  command: mv -v $HOME/ckan/contrib/docker/.env.template $HOME/ckan/contrib/docker/.env
+
+- name: Set Site url
+  lineinfile:
+    path: $HOME/ckan/contrib/docker/.env
+    regexp: 'CKAN_SITE_URL=http://localhost:5000'
+    line: 'CKAN_SITE_URL=http://0.0.0.0:5000'
+
+- name: Build Jenkins container
+  shell: docker build -t dockerfile .
+
+- name: Run Jenkins Container
+  docker_container:
+    name: MYJENKINS
+    state: started
+    restart: yes
+    detach: yes
+    cleanup: yes
+    image: dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /usr/local/bin/docker-compose:/usr/local/bin/docker-compose
+      - /root/ckan/:/var/jenkins_home/ckan/
+    ports:
+      - "8080:8080"
+  
+  tags:
+    - jenkins

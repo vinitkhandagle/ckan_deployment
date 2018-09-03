@@ -1,0 +1,54 @@
+---
+# Server setup on AWS
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Create security Group for the instance
+      ec2_group:
+        region: ap-south-1
+        name: ckan_group
+        description: SG for ckan docker containers
+        rules:
+          - proto: tcp
+            ports:
+              - 80
+              - 22
+              - 8080
+              - 5000
+
+            cidr_ip: 0.0.0.0/0
+            rule_desc: Allow access to server
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      tags:
+        - sg
+
+    - name: Provision EC2 Instance
+      ec2:
+        key_name: ckan
+        region: ap-south-1
+        instance_type: t2.medium
+        group: ckan_group
+        image: ami-c1503aae
+        wait: true
+        exact_count: 1
+        count_tag:
+          Name: ckan-demo
+        instance_tags:
+          Name: ckan-demo
+        volumes:
+          - device_name: /dev/sda1
+            device_type: gp2
+            volume_size: 100
+            delete_on_termination: true
+      register: ec2
+
+    - name: Associate New EIP
+      ec2_eip:
+        region: ap-south-1
+        device_id: "{{ item }}"
+      with_items: "{{ ec2.instance_ids }}"

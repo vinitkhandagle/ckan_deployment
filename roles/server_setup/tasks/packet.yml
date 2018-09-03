@@ -1,0 +1,15 @@
+---
+- name: create ubuntu device
+  hosts: localhost
+  tasks:
+
+  - packet_sshkey:
+      key_file: ~/.ssh/id_rsa.pub
+      label: tutorial key
+
+  - packet_device:
+      project_id: 03e1357c-7a60-4dd8-a75f-74d184b0e992 
+      hostnames: ckan.linbynd.com 
+      operating_system: ubuntu_16_04
+      plan: baremetal_0
+      facility: sjc1

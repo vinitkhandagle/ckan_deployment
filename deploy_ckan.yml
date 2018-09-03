@@ -1,0 +1,7 @@
+---
+- name: Deploying CKAN
+  hosts: aws1
+  become: yes
+
+  roles:
+  - server_setup
