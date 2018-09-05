@@ -26,7 +26,7 @@ export AWS_SECRET_ACCESS_KEY='<your AWS_SECRET_KEY>'
 ansible-playbook aws_server.yml -vvvv
 ```
 This setups up the instance for deployment of Docker, Jenkins and all the necessary docker information.
-This ansible run also creates an ssh key `ckankey` and places in your .ssh folder for later use.
+This ansible run also creates an ssh key `ckankey` and places in your `$HOME/.ssh/` folder for later use.
 
 4. If you check ur AWS account you can see the instance. to better manage the inventory note down the IP of the instance
     #### Pro tip
@@ -50,3 +50,16 @@ The timeout interval is set a bit higher depending on the speed of the downloadi
 
 This ansible run deploys the Jenkins container on the host with a Jenkins Job to deploy Ckan with docker compose.
 
+6. The Jenkins job `ckan_install` can be run to deploy CKAN as docker containers on the host.
+    This deploys containers for ckan application, a postgres container, redis container and a solr container.
+
+```
+ubuntu@ip-172-31-2-11:~$ sudo docker ps
+CONTAINER ID        IMAGE                       COMMAND                  CREATED             STATUS              PORTS                               NAMES
+356c15ec3fbb        docker_ckan                 "/ckan-entrypoint.sh…"   About an hour ago   Up About an hour    0.0.0.0:5000->5000/tcp              ckan
+e4c04fb785ae        redis:latest                "docker-entrypoint.s…"   About an hour ago   Up About an hour    6379/tcp                            redis
+27e3d59ae1f9        clementmouchet/datapusher   "python datapusher/m…"   About an hour ago   Up About an hour    0.0.0.0:8800->8800/tcp              datapusher
+9ee71a5f8d6d        docker_solr                 "docker-entrypoint.s…"   About an hour ago   Up About an hour    8983/tcp                            solr
+194c29fe6125        docker_db                   "docker-entrypoint.s…"   About an hour ago   Up About an hour    5432/tcp                            db
+679ecb8c6c9b        dockerfile                  "/sbin/tini -- /usr/…"   About an hour ago   Up About an hour    0.0.0.0:8080->8080/tcp, 50000/tcp   MYJENKINS
+```
