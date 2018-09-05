@@ -65,3 +65,8 @@ e4c04fb785ae        redis:latest                "docker-entrypoint.s…"   About
 ```
 
 7. After the containers are deployed you should be able to go to `http://public_ip:5000` to see the ckan application deployed on the container
+
+### Couple of Caveats
+The python interpreter on ubuntu is python3 and there is no symlink for python. This I noticed only on the AMI's for AWS and not on the packet hosts on baremetal cloud. I am not sure if its something that AWS has done. This causes the Ansible to fail on the first run as ansible is using pythoninterpreter. We can set that option for ansible as well or we can update-alternatives on the host. So I have explicitly updated the alternatives on the host through user-data.
+
+Docker in Docker is a bit combersum. So I have explicity used the docker engine on the host machine inside the Jenkins container. This could be a bit of a security issue as Ideally Jenkins gets root access on the host. But is the fastest way and less prone to issues when running Jenkins in a container. 
