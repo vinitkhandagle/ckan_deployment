@@ -66,6 +66,12 @@
     owner: root
   register: fileout
 
+- name: Copy job file
+  copy:
+    src: config.xml
+    dest: config.xml
+    owner: root
+
 - name: Copy Jenkins Plugins File
   copy:
     src: plugins.txt 
@@ -76,7 +82,7 @@
 - name: Install docker-py
   easy_install:
     name: docker_py
-    state: latest  
+    state: latest
 
 - name: Checkout ckan repo
   git:
@@ -109,6 +115,7 @@
       - /usr/bin/docker:/usr/bin/docker
       - /usr/local/bin/docker-compose:/usr/local/bin/docker-compose
       - /root/ckan/:/var/jenkins_home/ckan/
+
     ports:
       - "8080:8080"
   

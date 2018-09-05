@@ -1,0 +1,37 @@
+---
+- name: Disable a Jenkins job
+  hosts: aws1
+  gather_facts: yes
+  become: yes
+  
+  tasks:
+  # Disable a jenkins job using basic authentication
+  - name: Install some packages
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - build-essential
+      - python-pip
+      - python3-pip
+      - libffi-dev
+      - libssl-dev
+      - libxml2-dev
+      - libxslt1-dev
+      - python-dev
+      - python3-dev
+      - python-lxml
+      - python3-lxml
+      - python-jenkins
+      - python3-jenkins
+      - python3-venv
+      - git
+
+  - jenkins_job:
+      config: "{{ lookup('file', './config.xml') }}"
+      name: ckan_stuff4
+      password: admin
+      state: present
+      url: http://13.127.177.245:8080
+      user: admin
+
