@@ -63,3 +63,5 @@ e4c04fb785ae        redis:latest                "docker-entrypoint.s…"   About
 194c29fe6125        docker_db                   "docker-entrypoint.s…"   About an hour ago   Up About an hour    5432/tcp                            db
 679ecb8c6c9b        dockerfile                  "/sbin/tini -- /usr/…"   About an hour ago   Up About an hour    0.0.0.0:8080->8080/tcp, 50000/tcp   MYJENKINS
 ```
+
+7. After the containers are deployed you should be able to go to `http://public_ip:5000` to see the ckan application deployed on the container
